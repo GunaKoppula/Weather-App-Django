@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <title>Weather App</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        .bg-image {
+            background-image: url('/static/images/bg.jpg');
+            filter: blur(8px);
+            height: 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+        }
+
+        .content {
+            position: relative;
+            z-index: 2;
+            padding: 20px;
+        }
+
+        .bg-text {
+            background-color: rgba(0, 0, 0, 0.6);
+            color: white;
+            font-weight: bold;
+            border: 3px solid #f1f1f1;
+            margin: 15px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s ease;
+            width: 90%;
+        }
+
+        .bg-text:hover {
+            transform: scale(1.05);
+        }
+
+        input {
+            width: 20%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 20px;
+        }
+
+        button {
+            background-color: #8A2BE2;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: auto;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        
+        a {
+            background-color: #8A2BE2;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: auto;
+            font-weight: bold;
+            text-decoration: none;
+        }
+        
+        .logout {
+            background-color: #8A2BE2;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            width: auto;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        button:hover, a:hover, .logout:hover {
+            background-color: #4B0082;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .weather-data {
+            display: flex;
+            flex-direction: row;
+            margin-top: 25px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-title {
+            margin: 0;
+            font-weight: bold;
+            color: black;
+        }
+        
+        .cities {
+            display: grid;
+        }
+        
+        .card-city-name {
+            font-size: 15px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .name {
+            font-size: 30px;
+            margin: 0;
+        }
+        
+        .weather_condition {
+            font-size: 25px;
+        }
+        
+        .temp-details {
+            margin-bottom: 20px;
+        }
+
+        .temperature-columns {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .temperature {
+            margin-right: 20px;
+            font-size: 40px;
+        }
+
+        .temp-range {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .temp_min, .temp_max {
+            margin: 0;
+            font-size: 16px;
+        }
+        
+        .temp-line {
+            width: 100%;
+            height: 1px;
+            background: white;
+            border-radius: 10px;
+            margin: 1px;
+        }
+        
+        .weather-details {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .weather-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .weather-box {
+            flex: 1;
+            display: grid;
+            margin: 0 5px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            text-align: center;
+            background-color: #f9f9f9;
+            color: black;
+        }
+        
+        .icon {
+            width: 25px;
+            height: 25px;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+        }
+        
+        i {
+            margin-right: 10px;
+        }
+        
+        .alert {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <div class="bg-image"></div>
+    <div class="content">
+        <div class="header">
+            <h1 class="header-title">Weather Application</h1>
+            <a class="logout" href="{% url 'logout' %}">Logout</a>
+        </div>
+
+        {% if messages %}
+            <div class="alert">
+                {% for message in messages %}
+                    <div class="alert-message">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" action="{% url 'add_country' %}">
+            {% csrf_token %}
+            <input type="text" name="country_name" placeholder="Enter city name....."><button type="submit">Add</button>
+        </form>
+        <div class="weather-data">
+            {% for data in weather_data %}
+            <div class="bg-text">
+                <div class="card">
+                    <div class="cities">
+                        <div class="card-city-name">
+                            <div class="name">{{ data.country_name }}</div><br>
+                            {{data.date}}<br>
+                            {{data.time}}<br>
+                        </div>
+                        <div class="temp-details">
+                            <div class="weather_condition"><i class='fas fa-cloud-moon'></i>{{data.weather_condition}}</div>
+                            <div class="temperature-columns">
+                                <div class="temperature">{{data.temperature}}°C</div>
+                                <div class="temp-range">
+                                    <div class="temp_min">{{data.temp_min}}°C</div>
+                                    <div class="temp-line"></div>
+                                    <div class="temp_max">{{data.temp_max}}°C</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="weather-details">
+                            <div class="weather-row">
+                                <div class="weather-box">
+                                    <i style='font-size:24px' class='fas fa-temperature-low'></i>
+                                    Humidity
+                                    {{data.humidity}}%
+                                </div>
+                                <div class="weather-box">
+                                    <i style='font-size:24px' class='fas fa-wind'></i>
+                                    Wind
+                                    {{data.wind_speed}}km/h
+                                </div>
+                                <div class="weather-box">
+                                    <i style="font-size:24px" class="fa fa-compass"></i>
+                                    Pressure
+                                    {{data.pressure }}hPa
+                                </div>
+                            </div>
+                            <div class="weather-row">
+                                <div class="weather-box">
+                                    <i style="font-size:24px" class="fa fa-eye"></i>
+                                    Visibility
+                                    {{data.visibility}}km
+                                </div>
+                                <div class="weather-box">
+                                    <i style="font-size:24px" class="fa fa-thermometer"></i>
+                                    Feels like
+                                    {{data.feels_like}}°
+                                </div>
+                                <div class="weather-box">
+                                    <i style='font-size:24px' class='fas fa-temperature-high'></i>
+                                    Dew Point
+                                    {{data.dew_point}}°
+                                </div>
+                            </div>
+                        </div>
+                        
+                    </div>
+                    <a href="{% url 'remove_country' data.id %}">Remove</a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</body>
+
+</html>
