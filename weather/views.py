@@ -22,8 +22,8 @@ def signup(request):
             user = form.save(commit=False)
             user.set_password(form.cleaned_data['password'])
             user.save()
-            login(request, user)  # Automatically log in the user
-            return redirect('home')  # Redirect to the home page after signup
+            login(request, user)
+            return redirect('home')
     else:
         form = UserSignupForm()
     return render(request, 'weather/signup.html', {'form': form})
@@ -49,24 +49,20 @@ def logout_user(request):
 
 
 def get_datetime_from_coordinates(latitude, longitude):
-    # Find the timezone using coordinates
     tf = TimezoneFinder()
     timezone_str = tf.timezone_at(lat=latitude, lng=longitude)
     
     if timezone_str is None:
         return "Timezone not found for the given coordinates."
 
-    # Get the current time in the specified timezone
     tz = pytz.timezone(timezone_str)
     now = datetime.now(tz)
 
-    # Format the date and time
     formatted_date = now.strftime("%A, %d %B")
     formatted_time = now.strftime("%H:%M")
 
     return formatted_date, formatted_time
 
-# Calculate Dew Point
 def calculate_dew_point(temp, humidity):
     dew = temp - (100 - humidity) / 5
     dew_point = round(dew, 2)
@@ -91,7 +87,6 @@ def fetch_weather(country):
         dew_point = calculate_dew_point(temp, humidity)
         cloud_cover = data['clouds']['all']
 
-        # Determine weather condition based on cloud cover
         if cloud_cover <= 20:
             weather_condition = "Clear"
         elif cloud_cover <= 50:
@@ -119,43 +114,16 @@ def fetch_weather(country):
     return None
 
 
-# def add_country(request):
-#     if request.method == 'POST':
-#         country_name = request.POST.get('country_name')
-#         weather = fetch_weather(country_name)
-#         print(weather)
-#         if weather:
-#             CountryWeather.objects.create(
-#                 user=request.user,
-#                 country_name=weather['country'],
-#                 temperature=weather['temperature'],
-#                 humidity=weather['humidity'],
-#                 date=weather['date'],
-#                 time=weather['time'],
-#                 temp_min=weather['temp_min'],
-#                 temp_max=weather['temp_max'],
-#                 feels_like=weather['feels_like'],
-#                 pressure=weather['pressure'],
-#                 visibility=weather['visibility'],
-#                 wind_speed=weather['wind_speed'],
-#                 dew_point=weather['dew_point'],
-#                 weather_condition=weather['weather_condition']
-#             )
-#     return redirect('home')
-
-
 def add_country(request):
     if request.method == 'POST':
         country_name = request.POST.get('country_name')
         
-        # Check if the user already has 3 countries
         user_countries = CountryWeather.objects.filter(user=request.user)
         
         if user_countries.count() >= 3:
             messages.error(request, "You can only add up to 3 countries. Please remove one to add another.")
             return redirect('home')
         
-        # Fetch the weather data
         weather = fetch_weather(country_name)
         print(weather)
         
